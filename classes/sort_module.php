@@ -21,10 +21,8 @@
  * upon which they may be enrolled and which has auto-grouping
  * configured.
  *
- * @package    local
- * @subpackage autogroup
- * @author     Mark Ward (me@moodlemark.com)
- * @date       December 2014
+ * @package    local_autogroup
+ * @copyright  Mark Ward (me@moodlemark.com)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -45,10 +43,23 @@ use \stdClass;
 abstract class sort_module {
 
     /**
+     * @var
+     */
+    protected $user;
+    /**
+     * @var
+     */
+    protected $courseid;
+    /**
+     * @var array
+     */
+    protected $config = array();
+
+    /**
      * @param stdClass $config
      * @param int $courseid
      */
-    public abstract function __construct($config, $courseid);
+    abstract public function __construct($config, $courseid);
 
     /**
      * Child classes will probably override this method.
@@ -62,7 +73,7 @@ abstract class sort_module {
      * @param stdClass $user
      * @return array $result
      */
-    public abstract function eligible_groups_for_user(stdClass $user);
+    abstract public function eligible_groups_for_user(stdClass $user);
 
     /**
      * Returns the options to be displayed on the autgroup_set
@@ -70,15 +81,14 @@ abstract class sort_module {
      *
      * @return array
      */
-    public abstract function get_config_options();
+    abstract public function get_config_options();
 
     /**
      * @param string $attribute
      * @return array|null
      */
-    public function __get($attribute)
-    {
-        if($attribute = 'groups'){
+    public function __get($attribute) {
+        if ($attribute = 'groups') {
             return $this->eligible_groups();
         }
         return null;
@@ -89,8 +99,7 @@ abstract class sort_module {
      * @param $value
      * @return bool
      */
-    public function __set($attribute,$value)
-    {
+    public function __set($attribute, $value) {
         return false;
     }
 
@@ -99,21 +108,6 @@ abstract class sort_module {
      *
      * @return string
      */
-    public abstract function grouping_by();
-
-    /**
-     * @var
-     */
-    protected $user;
-
-    /**
-     * @var
-     */
-    protected $courseid;
-
-    /**
-     * @var array
-     */
-    protected $config = array();
+    abstract public function grouping_by();
 
 }

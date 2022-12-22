@@ -21,16 +21,14 @@
  * be overridden by the user through the language customisation
  * tool.
  *
- * @package    local
- * @subpackage autogroup
- * @author     Mark Ward (me@moodlemark.com)
- * @date       December 2014
+ * @package    local_autogroup
+ * @copyright  Mark Ward (me@moodlemark.com)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 $string['pluginname']  = 'Auto Group';
 
-// Course Settings
+// Course Settings.
 $string['actions'] = 'Actions';
 
 $string['coursesettings']  = 'Auto Groups';
@@ -52,7 +50,7 @@ $string['confirmdelete'] = 'Are you sure you wish to remove this auto group set?
 
 $string['create'] = 'Create new group set:';
 
-// Admin Settings
+// Admin Settings.
 $string['addtonewcourses'] = 'Add to new courses';
 $string['addtorestoredcourses'] = 'Add to restored courses';
 $string['preservemanual'] = 'Manually added Users are not removed when autogroups are updated.';
@@ -73,16 +71,16 @@ $string['listenforgroupchanges_help'] = 'Listen for modifications to groups on a
 $string['listenforgroupmembership'] = 'Group Membership';
 $string['listenforgroupmembership_help'] = 'Listen for changes to group membership. This can prevent issues caused by manual changes but will also slow down AutoGroup as it double checks its own actions. Previously configured as "Strict Enforcement".';
 
-// Capabilities
+// Capabilities.
 $string['autogroup:managecourse']  = 'Manage autogroup settings on course';
 
-// Sort profile field options
+// Sort profile field options.
 $string['auth'] = "Authentication Method";
 $string['city'] = "City";
 $string['department'] = "Department";
 $string['institution'] = "Institution";
 $string['lang'] = "Preferred Language";
 
-// Sort module names
+// Sort module names.
 $string['sort_module:profile_field'] = 'Profile field';
 $string['sort_module:user_info_field'] = 'Custom profile field';

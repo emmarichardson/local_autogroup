@@ -21,33 +21,34 @@
  * for multiple groups. Initialising a course object will automatically
  * load each autogroup group for that course into memory.
  *
- * @package    local
- * @subpackage autogroup
- * @author     Mark Ward (me@moodlemark.com)
- * @date       April 2015
+ * @package    local_autogroup
+ * @copyright  Mark Ward (me@moodlemark.com)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace local_autogroup\sort_module;
 
 use local_autogroup\sort_module;
-use local_autogroup\exception;
-use \stdClass;
+use stdClass;
 
-if(isset($CFG->totara_build) && (int) $CFG->totara_build > 20150302) {
+if (isset($CFG->totara_build) && (int)$CFG->totara_build > 20150302) {
     /**
      * Class course
      *
      * @package local_autogroup\domain
      */
-    class primary_position extends sort_module
-    {
+    class primary_position extends sort_module {
+
+        /**
+         * @var string
+         */
+        private $field = '';
+
         /**
          * @param stdClass $config
          * @param int $courseid
          */
-        public function __construct($config, $courseid)
-        {
+        public function __construct($config, $courseid) {
             if ($this->config_is_valid($config)) {
                 $this->field = $config->field;
             }
@@ -58,13 +59,12 @@ if(isset($CFG->totara_build) && (int) $CFG->totara_build > 20150302) {
          * @param stdClass $config
          * @return bool
          */
-        public function config_is_valid(stdClass $config)
-        {
+        public function config_is_valid(stdClass $config) {
             if (!isset($config->field)) {
                 return false;
             }
 
-            // ensure that the stored option is valid
+            // Ensure that the stored option is valid.
             if (array_key_exists($config->field, $this->get_config_options())) {
                 return true;
             }
@@ -76,32 +76,30 @@ if(isset($CFG->totara_build) && (int) $CFG->totara_build > 20150302) {
          * @param stdClass $user
          * @return array $result
          */
-        public function eligible_groups_for_user(stdClass $user)
-        {
+        public function eligible_groups_for_user(stdClass $user) {
             global $CFG;
             require_once("{$CFG->dirroot}/totara/hierarchy/prefix/position/lib.php");
 
             $field = $this->field . 'id';
 
-            // Attempt to load the assignment
+            // Attempt to load the assignment.
             $primarypos = new \position(
                 array(
-                    'userid'    => $user->id,
-                    'type'      => POSITION_TYPE_PRIMARY
+                    'userid' => $user->id,
+                    'type' => POSITION_TYPE_PRIMARY
                 )
             );
 
             if (isset($primarypos->$field) && !empty($primarypos->$field)) {
-                $method = 'parse_name_' . $this->field; // like parse_name_manager();
+                $method = 'parse_name_' . $this->field; // Like parse_name_manager() method.
 
                 $group = new stdClass();
                 $group->idnumber = $this->field . '_' . $primarypos->$field;
                 $group->friendlyname = $this->$method($primarypos->$field);
 
                 return array($group);
-            } else {
-                return array();
             }
+            return [];
         }
 
         /**
@@ -110,21 +108,19 @@ if(isset($CFG->totara_build) && (int) $CFG->totara_build > 20150302) {
          *
          * @return array
          */
-        public function get_config_options()
-        {
-            $options = array(
+        public function get_config_options() {
+            $options = [
                 'organisation' => get_string('organisation', 'totara_hierarchy'),
                 'position' => get_string('position', 'totara_hierarchy'),
                 'manager' => get_string('manager', 'totara_hierarchy'),
-            );
+            ];
             return $options;
         }
 
         /**
          * @return bool|string
          */
-        public function grouping_by()
-        {
+        public function grouping_by() {
             if (empty ($this->field)) {
                 return false;
             }
@@ -135,8 +131,7 @@ if(isset($CFG->totara_build) && (int) $CFG->totara_build > 20150302) {
          * @param int $id
          * @return string
          */
-        private function parse_name_manager($id)
-        {
+        private function parse_name_manager($id) {
             $manager = \core_user::get_user($id);
             return 'manager: ' . $manager->firstname . ' ' . $manager->lastname;
         }
@@ -145,9 +140,8 @@ if(isset($CFG->totara_build) && (int) $CFG->totara_build > 20150302) {
          * @param int $id
          * @return string
          */
-        private function parse_name_organisation($id)
-        {
-            global $DB; // until Totara provide a better method to get org data
+        private function parse_name_organisation($id) {
+            global $DB; // Until Totara provide a better method to get org data.
 
             return $DB->get_field('org', 'fullname', array('id' => $id));
         }
@@ -156,17 +150,11 @@ if(isset($CFG->totara_build) && (int) $CFG->totara_build > 20150302) {
          * @param int $id
          * @return string
          */
-        private function parse_name_position($id)
-        {
-            global $DB; // until Totara provide a better method to get pos data
+        private function parse_name_position($id) {
+            global $DB; // Until Totara provide a better method to get pos data.
 
             return $DB->get_field('pos', 'fullname', array('id' => $id));
         }
-
-        /**
-         * @var string
-         */
-        private $field = '';
 
     }
 

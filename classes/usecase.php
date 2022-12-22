@@ -21,10 +21,8 @@
  * upon which they may be enrolled and which has auto-grouping
  * configured.
  *
- * @package    local
- * @subpackage autogroup
- * @author     Mark Ward (me@moodlemark.com)
- * @date       December 2014
+ * @package    local_autogroup
+ * @copyright  Mark Ward (me@moodlemark.com)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -51,7 +49,7 @@ abstract class usecase {
     /**
      * @return mixed
      */
-    public abstract function __invoke();
+    abstract public function invoke();
 
     /**
      * Child classes will probably override this method.
@@ -65,7 +63,7 @@ abstract class usecase {
      * @param $attribute
      * @return null
      */
-    public function __get($attribute){
+    public function __get($attribute) {
         return null;
     }
 
@@ -74,7 +72,7 @@ abstract class usecase {
      * @param $value
      * @return bool
      */
-    public function __set($attribute, $value){
+    public function __set($attribute, $value) {
         return false;
     }
 }

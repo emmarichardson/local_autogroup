@@ -1,21 +1,50 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-defined('MOODLE_INTERNAL') || die();
+/**
+ * autogroup local plugin
+ *
+ * This plugin automatically assigns users to a group within any course
+ * upon which they may be enrolled and which has auto-grouping
+ * configured.
+ *
+ * @package    local_autogroup
+ * @copyright  Mark Ward (me@moodlemark.com)
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
+/**
+ * upgrade this autogroup plugin
+ * @param int $oldversion The old version of the assign module
+ * @return bool
+ */
 function xmldb_local_autogroup_upgrade($oldversion) {
     global $DB;
     $dbman = $DB->get_manager();
 
     if ($oldversion < 2016062201) {
 
-        // Convert "Strict enforcement" settings to new toggles
+        // Convert "Strict enforcement" settings to new toggles.
         $pluginconfig = get_config('local_autogroup');
-        if($pluginconfig->strict){
+        if ($pluginconfig->strict) {
             set_config('listenforgroupchanges', true, 'local_autogroup');
             set_config('listenforgroupmembership', true, 'local_autogroup');
         }
 
-        // savepoint reached.
+        // Savepoint reached.
         upgrade_plugin_savepoint(true, 2016062201, 'local', 'autogroup');
     }
 
@@ -40,12 +69,12 @@ function xmldb_local_autogroup_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2018102300, 'local', 'autogroup');
     }
 
-    if ($oldversion < 2019010300)  {
+    if ($oldversion < 2019010300) {
         require_once(__DIR__ . '/../classes/event_handler.php');
 
         $roleids = array_keys(get_all_roles());
         list($sql, $params) = $DB->get_in_or_equal($roleids, SQL_PARAMS_QM, 'param', false);
-        $invalidroleids = $DB->get_fieldset_select('local_autogroup_roles', 'DISTINCT roleid', 'roleid '.$sql, $params);
+        $invalidroleids = $DB->get_fieldset_select('local_autogroup_roles', 'DISTINCT roleid', 'roleid ' . $sql, $params);
         foreach ($invalidroleids as $roleid) {
             $event = \core\event\role_deleted::create(
                 [

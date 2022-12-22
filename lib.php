@@ -21,10 +21,8 @@
  * upon which they may be enrolled and which has auto-grouping
  * configured.
  *
- * @package    local
- * @subpackage autogroup
- * @author     Mark Ward (me@moodlemark.com)
- * @date       December 2014
+ * @package    local_autogroup
+ * @copyright  Mark Ward (me@moodlemark.com)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -36,9 +34,11 @@
  * function name should being with "local_autogroup" to prevent conflicts
  */
 
-include_once(__DIR__ . '/locallib.php');
+defined('MOODLE_INTERNAL') || die();
 
-if($CFG->branch == '27') {
+require_once(__DIR__ . '/locallib.php');
+
+if ($CFG->branch == '27') {
     /**
      * Generates the course settings navigation for Moodle 27
      *
@@ -47,8 +47,7 @@ if($CFG->branch == '27') {
      * @return bool
      * @throws coding_exception
      */
-    function local_autogroup_extends_settings_navigation(settings_navigation $settingsnav, context $context)
-    {
+    function local_autogroup_extends_settings_navigation(settings_navigation $settingsnav, context $context) {
         if (!local_autogroup\plugin_is_enabled()) {
             return false;
         }
@@ -57,9 +56,7 @@ if($CFG->branch == '27') {
 
         return true;
     }
-}
-
-else {
+} else {
     /**
      * Generates the course settings navigation for Moodle 28 and higher
      *
@@ -68,8 +65,7 @@ else {
      * @return bool
      * @throws coding_exception
      */
-    function local_autogroup_extend_settings_navigation(settings_navigation $settingsnav, context $context)
-    {
+    function local_autogroup_extend_settings_navigation(settings_navigation $settingsnav, context $context) {
         if (!local_autogroup\plugin_is_enabled()) {
             return false;
         }

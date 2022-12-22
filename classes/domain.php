@@ -21,10 +21,8 @@
  * upon which they may be enrolled and which has auto-grouping
  * configured.
  *
- * @package    local
- * @subpackage autogroup
- * @author     Mark Ward (me@moodlemark.com)
- * @date       December 2014
+ * @package    local_autogroup
+ * @copyright  Mark Ward (me@moodlemark.com)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -43,70 +41,28 @@ namespace local_autogroup;
  */
 abstract class domain {
     /**
+     * @var array
+     */
+    protected $attributes = array('id', 'timecreated', 'timemodified');
+    /**
+     * @var int
+     */
+    protected $timecreated = 0;
+    /**
+     * @var int
+     */
+    protected $timemodified = 0;
+    /**
+     * @type int
+     */
+    private $id = 0;
+
+    /**
      * Child classes will probably override this method.
      * @return string
      */
     public function __toString() {
         return get_class($this) . " " . $this->get_id();
-    }
-
-    /**
-     * @param $attribute
-     * @return int|null
-     */
-    public function __get($attribute)
-    {
-        if(!\in_array($attribute, $this->attributes)) {
-            return null;
-        }
-
-        if($attribute == 'id'){
-            return $this->get_id();
-        }
-        else {
-            return $this->$attribute;
-        }
-    }
-
-    /**
-     * @param $attribute
-     * @param $value
-     * @return bool
-     */
-    public function __set($attribute,$value)
-    {
-        if(!in_array($attribute, $this->attributes)) {
-            return false;
-        }
-
-        if($attribute == 'id'){
-            $this->set_id($value);
-        }
-        else {
-            $this->$attribute = $value;
-        }
-
-        //timemodified will always reflect the last change
-        $this->timemodified = time();
-        return true;
-    }
-
-    /**
-     * @return bool
-     */
-    public function exists(){
-        return $this->id > 0;
-    }
-
-    /**
-     * A helper function to set the timestamps on this item correctly.
-     */
-    protected function update_timestamps()
-    {
-        if( !$this->exists() ){
-            $this->timecreated = time();
-        }
-        $this->timemodified = time();
     }
 
     /**
@@ -117,29 +73,62 @@ abstract class domain {
     }
 
     /**
-     * @param int $id
+     * @param $attribute
+     * @return int|null
      */
-    private function set_id($id) {
-        $this->id = (int) $id;
+    public function __get($attribute) {
+        if (!\in_array($attribute, $this->attributes)) {
+            return null;
+        }
+
+        if ($attribute == 'id') {
+            return $this->get_id();
+        }
+        return $this->$attribute;
     }
 
     /**
-     * @var array
+     * @param $attribute
+     * @param $value
+     * @return bool
      */
-    protected $attributes = array('id', 'timecreated', 'timemodified');
+    public function __set($attribute, $value) {
+        if (!in_array($attribute, $this->attributes)) {
+            return false;
+        }
+
+        if ($attribute == 'id') {
+            $this->set_id($value);
+        } else {
+            $this->$attribute = $value;
+        }
+
+        // Timemodified will always reflect the last change.
+        $this->timemodified = time();
+        return true;
+    }
 
     /**
-     * @var int
+     * @param int $id
      */
-    protected $timecreated = 0;
+    private function set_id($id) {
+        $this->id = (int)$id;
+    }
 
     /**
-     * @var int
+     * A helper function to set the timestamps on this item correctly.
      */
-    protected $timemodified = 0;
+    protected function update_timestamps() {
+        if (!$this->exists()) {
+            $this->timecreated = time();
+        }
+        $this->timemodified = time();
+    }
 
     /**
-     * @type int
+     * @return bool
      */
-    private $id = 0;
+    public function exists() {
+        return $this->id > 0;
+    }
 }

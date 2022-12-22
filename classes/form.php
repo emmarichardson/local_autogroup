@@ -21,18 +21,17 @@
  * for multiple groups. Initialising a course object will automatically
  * load each autogroup group for that course into memory.
  *
- * @package    local
- * @subpackage autogroup
- * @author     Mark Ward (me@moodlemark.com)
- * @date       January 2015
+ * @package    local_autogroup
+ * @copyright  Mark Ward (me@moodlemark.com)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace local_autogroup;
 
+defined('MOODLE_INTERNAL') || die();
+
 use moodleform;
 
-global $CFG;
 require_once($CFG->libdir . '/formslib.php');
 
 /**
@@ -44,6 +43,5 @@ require_once($CFG->libdir . '/formslib.php');
  *
  * @package local_autogroup
  */
-abstract class form extends moodleform
-{
+abstract class form extends moodleform {
 }

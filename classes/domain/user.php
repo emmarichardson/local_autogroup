@@ -25,10 +25,8 @@
  * A user is also a group member; a membership register is also maintained
  * by this class.
  *
- * @package    local
- * @subpackage autogroup
- * @author     Mark Ward (me@moodlemark.com)
- * @date       December 2014
+ * @package    local_autogroup
+ * @copyright  Mark Ward (me@moodlemark.com)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -47,42 +45,76 @@ use local_autogroup\exception;
  *
  * @package local_autogroup\domain
  */
-class user extends domain
-{
+class user extends domain {
+    /**
+     * @var array
+     */
+    private $membership = [];
+    /**
+     * @var array
+     */
+    private $courses = [];
+    /**
+     * @var /stdclass
+     */
+    private $object;
+
     /**
      * @param object|int $user
      * @param \moodle_database $db
      * @param int $onlyload a courseid to restrict loading to
      * @throws exception\invalid_user_argument
      */
-    public function __construct ($user, \moodle_database $db, $onlyload = 0)
-    {
-        //get the data for this user
+    public function __construct($user, \moodle_database $db, $onlyload = 0) {
+        // Get the data for this user.
         $this->parse_user_data($user, $db);
 
-        //register which autogroup groups this user is a member of currently
+        // Register which autogroup groups this user is a member of currently.
         $this->get_group_membership($db);
 
-        //if applicable, load courses this user is on and their autogroup groups
+        // If applicable, load courses this user is on and their autogroup groups.
         $this->get_courses($db, $onlyload);
+    }
 
-        return true;
+    /**
+     * @param object|int $user
+     * @return bool
+     * @throws exception\invalid_user_argument
+     */
+    private function parse_user_data($user, \moodle_database $db) {
+        // TODO: restructure to allow usage of custom profile fields.
+
+        if (is_int($user) && $user > 0) {
+            $this->id = $user;
+            $this->object = $db->get_record('user', array('id' => $user));
+            return true;
+        }
+
+        if (is_object($user) && isset($user->id) && $user->id > 0) {
+            $this->id = $user->id;
+            $this->object = $user;
+            return true;
+        }
+
+        throw new exception\invalid_user_argument($user);
     }
 
     /**
      * @param \moodle_database $db
-     * @return bool
      */
-    public function verify_user_group_membership(\moodle_database $db)
-    {
-        $result = true;
-        foreach ($this->courses as $course){
-            $result &= $course->verify_user_group_membership($this->object, $db);
-        }
+    private function get_group_membership(\moodle_database $db) {
+        $sql = "SELECT g.id, g.courseid" . PHP_EOL
+            . "FROM {groups} g" . PHP_EOL
+            . "LEFT JOIN {groups_members} gm" . PHP_EOL
+            . "ON gm.groupid = g.id" . PHP_EOL
+            . "WHERE gm.userid = :userid" . PHP_EOL
+            . "AND " . $db->sql_like('g.idnumber', ':autogrouptag');
+        $param = array(
+            'userid' => $this->id,
+            'autogrouptag' => 'autogroup|%'
+        );
 
-        $this->get_group_membership($db);
-
-        return $result;
+        $this->membership = $db->get_records_sql_menu($sql, $param);
     }
 
     /**
@@ -90,9 +122,8 @@ class user extends domain
      *
      * @param \moodle_database $db
      */
-    private function get_courses(\moodle_database $db, $onlyload = 0)
-    {
-        if($onlyload < 1) {
+    private function get_courses(\moodle_database $db, $onlyload = 0) {
+        if ($onlyload < 1) {
             $sql = "SELECT e.courseid" . PHP_EOL
                 . "FROM {enrol} e" . PHP_EOL
                 . "LEFT JOIN {user_enrolments} ue" . PHP_EOL
@@ -104,17 +135,15 @@ class user extends domain
             $param = array('userid' => $this->id);
 
             $this->courses = $db->get_fieldset_sql($sql, $param);
-        }
-
-        else {
+        } else {
             $this->courses[] = $onlyload;
         }
 
-        foreach($this->courses as $k => $courseid){
+        foreach ($this->courses as $k => $courseid) {
             try {
-                $courseid = (int) $courseid;
+                $courseid = (int)$courseid;
                 $this->courses[$k] = new course($courseid, $db);
-            } catch (exception\invalid_course_argument $e){
+            } catch (exception\invalid_course_argument $e) {
                 unset($this->courses[$k]);
             }
         }
@@ -122,59 +151,16 @@ class user extends domain
 
     /**
      * @param \moodle_database $db
-     */
-    private function get_group_membership(\moodle_database $db)
-    {
-        $sql = "SELECT g.id, g.courseid".PHP_EOL
-              ."FROM {groups} g".PHP_EOL
-              ."LEFT JOIN {groups_members} gm".PHP_EOL
-              ."ON gm.groupid = g.id".PHP_EOL
-              ."WHERE gm.userid = :userid".PHP_EOL
-              ."AND ".$db->sql_like('g.idnumber', ':autogrouptag');
-        $param = array(
-            'userid' => $this->id,
-            'autogrouptag' => 'autogroup|%'
-        );
-
-        $this->membership = $db->get_records_sql_menu($sql,$param);
-    }
-
-    /**
-     * @param object|int $user
      * @return bool
-     * @throws exception\invalid_user_argument
      */
-    private function parse_user_data ($user, \moodle_database $db)
-    {
-        //TODO: restructure to allow usage of custom profile fields
-
-        if(is_int($user) && $user > 0){
-            $this->id = $user;
-            $this->object = $db->get_record('user',array('id'=>$user));
-            return true;
+    public function verify_user_group_membership(\moodle_database $db) {
+        $result = true;
+        foreach ($this->courses as $course) {
+            $result &= $course->verify_user_group_membership($this->object, $db);
         }
 
-        if(is_object($user) && isset($user->id) && $user->id > 0){
-            $this->id = $user->id;
-            $this->object = $user;
-            return true;
-        }
+        $this->get_group_membership($db);
 
-        throw new exception\invalid_user_argument($user);
+        return $result;
     }
-
-    /**
-     * @var array
-     */
-    private $membership = array();
-
-    /**
-     * @var array
-     */
-    private $courses = array();
-
-    /**
-     * @var /stdclass
-     */
-    private $object;
 }
