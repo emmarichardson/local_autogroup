@@ -50,7 +50,7 @@ require_capability('local/autogroup:managecourse', $context);
 
 global $PAGE, $DB, $SITE;
 
-if ($courseid == $SITE->id || !plugin_is_enabled()) {
+if ($courseid == $SITE->id || !local_autogroup_plugin_is_enabled()) {
     // Do not allow editing for front page.
     die();
 }
