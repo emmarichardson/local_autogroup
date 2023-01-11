@@ -41,7 +41,7 @@ class local_autogroup_renderer extends plugin_renderer_base {
         $urlparams = array('action' => 'add', 'courseid' => (int)$courseid);
         $newurl = new moodle_url(self::URL_COURSE_SETTINGS, $urlparams);
 
-        $modules = \local_autogroup\local_autogroup_get_sort_module_list();
+        $modules = \local_autogroup\get_sort_module_list();
 
         $select = new single_select($newurl, 'sortmodule', $modules);
         $select->set_label(get_string('create', 'local_autogroup'));
@@ -95,7 +95,7 @@ class local_autogroup_renderer extends plugin_renderer_base {
         $row = array();
 
         // Get the groupset type.
-        $row [] = ucfirst(\local_autogroup\local_autogroup_sanitise_sort_module_name($groupset->sortmodule));
+        $row [] = ucfirst(\local_autogroup\sanitise_sort_module_name($groupset->sortmodule));
 
         // Get the grouping by text.
         $row [] = ucfirst($groupset->grouping_by());

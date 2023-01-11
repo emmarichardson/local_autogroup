@@ -64,7 +64,7 @@ class verify_user_group_membership extends usecase {
      * @return bool
      */
     public function invoke() {
-        if (!\local_autogroup\local_autogroup_plugin_is_enabled()) {
+        if (!\local_autogroup\plugin_is_enabled()) {
             return false;
         }
         return $this->user->verify_user_group_membership($this->db);

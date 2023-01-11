@@ -92,7 +92,7 @@ if ($hassiteconfig) {
     );
     // TODO: group by sort module using optgroup when MDL-61248 is fixed.
     $choices = [];
-    $modules = \local_autogroup\local_autogroup_get_sort_module_list();
+    $modules = \local_autogroup\get_sort_module_list();
 
     foreach ($modules as $sortedmodulename => $name) {
         $sortedmodulename = "\\local_autogroup\\sort_module\\$sortedmodulename";

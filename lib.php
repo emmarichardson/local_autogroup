@@ -48,11 +48,11 @@ if ($CFG->branch == '27') {
      * @throws coding_exception
      */
     function local_autogroup_extends_settings_navigation(settings_navigation $settingsnav, context $context) {
-        if (!local_autogroup\local_autogroup_plugin_is_enabled()) {
+        if (!local_autogroup\plugin_is_enabled()) {
             return false;
         }
 
-        local_autogroup\local_autogroup_amend_settings_structure($settingsnav, $context);
+        local_autogroup\amend_settings_structure($settingsnav, $context);
 
         return true;
     }
@@ -66,11 +66,11 @@ if ($CFG->branch == '27') {
      * @throws coding_exception
      */
     function local_autogroup_extend_settings_navigation(settings_navigation $settingsnav, context $context) {
-        if (!local_autogroup\local_autogroup_plugin_is_enabled()) {
+        if (!local_autogroup\plugin_is_enabled()) {
             return false;
         }
 
-        local_autogroup\local_autogroup_amend_settings_structure($settingsnav, $context);
+        local_autogroup\amend_settings_structure($settingsnav, $context);
 
         return true;
     }
