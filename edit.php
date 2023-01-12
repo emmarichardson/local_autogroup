@@ -48,7 +48,7 @@ require_login();
 require_once(__DIR__ . '/locallib.php');
 require_once(__DIR__ . '/renderer.php');
 
-if (!local_autogroup_plugin_is_enabled()) {
+if (!plugin_is_enabled()) {
     // Do not allow editing for front page.
     die();
 }

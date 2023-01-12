@@ -42,7 +42,7 @@ define('SORT_MODULE_DIR', $CFG->dirroot . '/local/autogroup/classes/sort_module/
  *
  * @return bool
  */
-function local_autogroup_plugin_is_enabled() {
+function plugin_is_enabled() {
     $config = get_config('local_autogroup');
     return isset($config->enabled) && $config->enabled;
 }
@@ -52,7 +52,7 @@ function local_autogroup_plugin_is_enabled() {
  *
  * @return array
  */
-function local_autogroup_get_sort_module_list() {
+function get_sort_module_list() {
     $list = [];
 
     $files = scandir(SORT_MODULE_DIR);
@@ -65,7 +65,7 @@ function local_autogroup_get_sort_module_list() {
             $fullname = 'local_autogroup\\sort_module\\' . $classname;
 
             if (class_exists($fullname)) {
-                $list[$classname] = local_autogroup_sanitise_sort_module_name($classname);
+                $list[$classname] = sanitise_sort_module_name($classname);
             }
         }
     }
@@ -77,7 +77,7 @@ function local_autogroup_get_sort_module_list() {
  * @param $name
  * @return \lang_string|string
  */
-function local_autogroup_sanitise_sort_module_name($name = '') {
+function sanitise_sort_module_name($name = '') {
 
     // For when we are passed the full name.
     $name = explode('\\', $name);
@@ -96,7 +96,7 @@ function local_autogroup_sanitise_sort_module_name($name = '') {
  * @param context $context
  * @return void
  */
-function local_autogroup_amend_settings_structure(settings_navigation $settingsnav, context $context) {
+function amend_settings_structure(settings_navigation $settingsnav, context $context) {
     global $PAGE, $SITE;
 
     $course = $PAGE->course;
