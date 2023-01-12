@@ -66,7 +66,7 @@ class verify_group_population extends usecase {
      * @return void
      */
     public function invoke() {
-        if (!\local_autogroup\local_autogroup_plugin_is_enabled()) {
+        if (!local_autogroup_plugin_is_enabled()) {
             return;
         }
 

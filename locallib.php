@@ -34,14 +34,6 @@
  * prevents compatability issues with other plugins.
  */
 
-namespace local_autogroup;
-
-use settings_navigation;
-use context;
-use navigation_node;
-use moodle_url;
-use pix_icon;
-
 define('SORT_MODULE_DIR', $CFG->dirroot . '/local/autogroup/classes/sort_module/');
 
 /**
