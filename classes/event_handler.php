@@ -29,7 +29,7 @@
 namespace local_autogroup;
 
 use \core\event;
-use \local_autogroup\usecase;
+use local_autogroup\domain\group;
 
 /**
  * Class event_handler
@@ -80,7 +80,9 @@ class event_handler {
         $userid = (int)$event->relateduserid;
         $groupid = (int)$event->objectid;
 
-        if (!$DB->record_exists('local_autogroup_manual', array('userid' => $userid, 'groupid' => $groupid))) {
+        $group = new group($groupid, $DB);
+        if ($group->is_valid_autogroup($DB) &&
+            !$DB->record_exists('local_autogroup_manual', array('userid' => $userid, 'groupid' => $groupid))) {
             $record = (object)array('userid' => $userid, 'groupid' => $groupid);
             $DB->insert_record('local_autogroup_manual', $record);
         }

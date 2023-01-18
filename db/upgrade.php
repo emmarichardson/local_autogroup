@@ -90,5 +90,14 @@ function xmldb_local_autogroup_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2019010300, 'local', 'autogroup');
     }
 
+    if ($oldversion < 2022062500.01) {
+        $sql = "DELETE LAM FROM {local_autogroup_manual} LAM JOIN {groups} G ON (G.id = LAM.groupid) WHERE ";
+        $sql .= $DB->sql_like('G.idnumber', ':autogroupidnum', true, true, true);
+
+        $DB->execute($sql, ['autogroupidnum' => 'autogroup|%']);
+
+        upgrade_plugin_savepoint(true, 2022122200, 'local', 'autogroup');
+    }
+
     return true;
 }

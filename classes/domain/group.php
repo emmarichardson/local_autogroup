@@ -102,7 +102,7 @@ class group extends domain {
     private $members;
 
     /**
-     * @param stdClass $group
+     * @param int|stdClass $group
      * @param \moodle_database $db
      * @throws exception\invalid_group_argument
      */
