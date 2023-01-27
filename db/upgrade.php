@@ -96,7 +96,7 @@ function xmldb_local_autogroup_upgrade($oldversion) {
 
         $DB->execute($sql, ['autogroupidnum' => 'autogroup|%']);
 
-        upgrade_plugin_savepoint(true, 2022122200, 'local', 'autogroup');
+        upgrade_plugin_savepoint(true, 2022062500.01, 'local', 'autogroup');
     }
 
     return true;
