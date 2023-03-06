@@ -84,3 +84,10 @@ $string['lang'] = "Preferred Language";
 // Sort module names.
 $string['sort_module:profile_field'] = 'Profile field';
 $string['sort_module:user_info_field'] = 'Custom profile field';
+
+// Privacy provider
+$string['privacy:metadata:local_autogroup'] = 'Data relating users for the local autogroup plugin';
+$string['privacy:metadata:local_autogroup_manual'] = 'Data relating users manually assigned to autogroup groups';
+$string['privacy:metadata:local_autogroup_manual:id'] = 'Record ID';
+$string['privacy:metadata:local_autogroup_manual:userid'] = 'The ID of the user';
+$string['privacy:metadata:local_autogroup_manual:groupid'] = 'The ID that relates to the group';
