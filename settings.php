@@ -21,10 +21,8 @@
  * for multiple groups. Initialising a course object will automatically
  * load each autogroup group for that course into memory.
  *
- * @package    local
- * @subpackage autogroup
- * @author     Mark Ward (me@moodlemark.com)
- * @date       January 2015
+ * @package    local_autogroup
+ * @copyright  Mark Ward (me@moodlemark.com)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -43,7 +41,7 @@ if ($hassiteconfig) {
         get_string('pluginname', 'local_autogroup')
     );
 
-    // general settings
+    // General settings.
     $settings->add(
         new admin_setting_heading(
             'local_autogroup/general',
@@ -84,7 +82,7 @@ if ($hassiteconfig) {
         )
     );
 
-    // default settings
+    // Default settings.
     $settings->add(
         new admin_setting_heading(
             'local_autogroup/defaults',
@@ -92,9 +90,9 @@ if ($hassiteconfig) {
             ''
         )
     );
-    //TODO: group by sort module using optgroup when MDL-61248 is fixed.
+    // TODO: group by sort module using optgroup when MDL-61248 is fixed.
     $choices = [];
-    $modules = \local_autogroup\get_sort_module_list();
+    $modules = local_autogroup_get_sort_module_list();
 
     foreach ($modules as $sortedmodulename => $name) {
         $sortedmodulename = "\\local_autogroup\\sort_module\\$sortedmodulename";
@@ -113,7 +111,7 @@ if ($hassiteconfig) {
         )
     );
 
-    // default roles
+    // Default roles.
     $settings->add(
         new admin_setting_heading(
             'local_autogroup/roleconfig',
@@ -126,12 +124,12 @@ if ($hassiteconfig) {
         $roles = \role_fix_names($roles, null, ROLENAME_ORIGINAL);
         $assignableroles = \get_roles_for_contextlevels(CONTEXT_COURSE);
         foreach ($roles as $role) {
-            //default should be true for students
+            // Default should be true for students.
             $default = ($role->id == 5);
 
             $settings->add(
                 new admin_setting_configcheckbox(
-                    'local_autogroup/eligiblerole_'.$role->id,
+                    'local_autogroup/eligiblerole_' . $role->id,
                     $role->localname,
                     '',
                     $default
@@ -140,7 +138,7 @@ if ($hassiteconfig) {
         }
     }
 
-    // Event listeners
+    // Event listeners.
     $settings->add(
         new admin_setting_heading(
             'local_autogroup/events',
@@ -164,8 +162,7 @@ if ($hassiteconfig) {
             true
         )
     );
-    if( isset($CFG->totara_build) ) // Only for Totara
-    {
+    if (isset($CFG->totara_build)) { // Only for Totara.
         $settings->add(
             new admin_setting_configcheckbox(
                 'local_autogroup/listenforuserpositionchanges',

@@ -21,68 +21,52 @@
  * for multiple groups. Initialising a course object will automatically
  * load each autogroup group for that course into memory.
  *
- * @package    local
- * @subpackage autogroup
- * @author     Mark Ward (me@moodlemark.com)
- * @date       December 2014
+ * @package    local_autogroup
+ * @copyright  Mark Ward (me@moodlemark.com)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace local_autogroup\sort_module;
 
 use local_autogroup\sort_module;
-use local_autogroup\exception;
-use \stdClass;
+use stdClass;
 
 /**
  * Class course
  * @package local_autogroup\domain
  */
-class profile_field extends sort_module
-{
+class profile_field extends sort_module {
+    /**
+     * @var string
+     */
+    private $field = '';
+
     /**
      * @param stdClass $config
      * @param int $courseid
      */
-    public function __construct($config, $courseid)
-    {
-        if($this->config_is_valid($config)){
+    public function __construct($config, $courseid) {
+        if ($this->config_is_valid($config)) {
             $this->field = $config->field;
         }
-        $this->courseid = (int) $courseid;
+        $this->courseid = (int)$courseid;
     }
 
     /**
      * @param stdClass $config
      * @return bool
      */
-    public function config_is_valid(stdClass $config)
-    {
-        if(!isset($config->field)){
+    public function config_is_valid(stdClass $config) {
+        if (!isset($config->field)) {
             return false;
         }
 
-        //ensure that the stored option is valid
-        if(array_key_exists($config->field, $this->get_config_options())){
+        // Ensure that the stored option is valid.
+        if (array_key_exists($config->field, $this->get_config_options())) {
             return true;
         }
 
         return false;
-    }
-
-    /**
-     * @param stdClass $user
-     * @return array $result
-     */
-    public function eligible_groups_for_user(stdClass $user)
-    {
-        $field = $this->field;
-        if (isset($user->$field) && !empty($user->$field)){
-            return array($user->$field);
-        }
-        else {
-            return array();
-        }
     }
 
     /**
@@ -91,30 +75,37 @@ class profile_field extends sort_module
      *
      * @return array
      */
-    public function get_config_options(){
-        $options = array(
+    public function get_config_options() {
+        $options = [
             'auth' => get_string('auth', 'local_autogroup'),
             'department' => get_string('department', 'local_autogroup'),
             'institution' => get_string('institution', 'local_autogroup'),
             'lang' => get_string('lang', 'local_autogroup'),
             'city' => get_string('city', 'local_autogroup'),
-        );
+        ];
         return $options;
+    }
+
+    /**
+     * @param stdClass $user
+     * @return array $result
+     */
+    public function eligible_groups_for_user(stdClass $user) {
+        $field = $this->field;
+        if (isset($user->$field) && !empty($user->$field)) {
+            return [$user->$field];
+        }
+        return [];
     }
 
     /**
      * @return bool|string
      */
-    public function grouping_by(){
-        if(empty ($this->field)){
+    public function grouping_by() {
+        if (empty ($this->field)) {
             return false;
         }
-        return (string) $this->field;
+        return (string)$this->field;
     }
-
-    /**
-     * @var string
-     */
-    private $field = '';
 
 }

@@ -21,17 +21,17 @@
  * upon which they may be enrolled and which has auto-grouping
  * configured.
  *
- * @package    local
- * @subpackage autogroup
- * @author     Mark Ward (me@moodlemark.com)
- * @date       December 2014
+ * @package    local_autogroup
+ * @copyright  Mark Ward (me@moodlemark.com)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace local_autogroup\usecase;
 
-use local_autogroup\usecase;
+defined('MOODLE_INTERNAL') || die();
+
 use local_autogroup\domain;
+use local_autogroup\usecase;
 use moodle_database;
 use stdClass;
 
@@ -41,23 +41,38 @@ require_once($CFG->dirroot . '/local/autogroup/lib.php');
  * Class add_default_to_course
  * @package local_autogroup\usecase
  */
-class add_default_to_course extends usecase
-{
+class add_default_to_course extends usecase {
+    /**
+     * @var bool
+     */
+    private $addtonewcourse = false;
+    /**
+     * @var domain\group
+     */
+    private $courseid;
+    /**
+     * @var moodle_database
+     */
+    private $db;
+    /**
+     * @var stdClass
+     */
+    private $pluginconfig;
+
     /**
      * @param int $courseid
      * @param moodle_database $db
      */
-    public function __construct($courseid, moodle_database $db)
-    {
-        $this->courseid = (int) $courseid;
+    public function __construct($courseid, moodle_database $db) {
+        $this->courseid = (int)$courseid;
         $this->db = $db;
 
         $this->pluginconfig = get_config('local_autogroup');
 
         $this->addtonewcourse = true;
 
-        if($db->record_exists('local_autogroup_set', array('courseid'=>$courseid))){
-            //this shouldn't happen, but we want to ensure we avoid duplicates.
+        if ($db->record_exists('local_autogroup_set', array('courseid' => $courseid))) {
+            // This shouldn't happen, but we want to ensure we avoid duplicates.
             $this->addtonewcourse = false;
         }
     }
@@ -65,66 +80,45 @@ class add_default_to_course extends usecase
     /**
      * @return void
      */
-    public function __invoke()
-    {
-        if($this->addtonewcourse){
+    public function invoke() {
+        if ($this->addtonewcourse) {
 
-            // first generate a new autogroup_set object
-            $autogroup_set = new domain\autogroup_set($this->db);
-            $autogroup_set->set_course($this->courseid);
+            // First generate a new autogroup_set object.
+            $autogroupset = new domain\autogroup_set($this->db);
+            $autogroupset->set_course($this->courseid);
 
-            // set the sorting options to global default
+            // Set the sorting options to global default.
             $options = new stdClass();
             $options->field = $this->pluginconfig->filter;
-            if(is_numeric($this->pluginconfig->filter)){
-                $autogroup_set->set_sort_module('user_info_field');
+            if (is_numeric($this->pluginconfig->filter)) {
+                $autogroupset->set_sort_module('user_info_field');
             }
 
-            $autogroup_set->set_options($options);
+            $autogroupset->set_options($options);
 
-            // now we can set the eligible roles to global default
+            // Now we can set the eligible roles to global default.
             if ($roles = \get_all_roles()) {
                 $roles = \role_fix_names($roles, null, ROLENAME_ORIGINAL);
                 $newroles = array();
-                foreach ($roles as $role){
-                    $attributename = 'eligiblerole_'.$role->id;
+                foreach ($roles as $role) {
+                    $attributename = 'eligiblerole_' . $role->id;
 
                     if (isset($this->pluginconfig->$attributename) &&
-                        $this->pluginconfig->$attributename){
+                        $this->pluginconfig->$attributename) {
 
                         $newroles[] = $role->id;
 
                     }
                 }
 
-                $autogroup_set->set_eligible_roles($newroles);
+                $autogroupset->set_eligible_roles($newroles);
             }
 
-            // save all that to db
-            $autogroup_set->save($this->db);
+            // Save all that to db.
+            $autogroupset->save($this->db);
 
             $usecase = new usecase\verify_course_group_membership($this->courseid, $this->db);
-            $usecase();
+            $usecase->invoke();
         }
     }
-
-    /**
-     * @var bool
-     */
-    private $addtonewcourse = false;
-
-    /**
-     * @var domain\group
-     */
-    private $courseid;
-
-    /**
-     * @var moodle_database
-     */
-    private $db;
-
-    /**
-     * @var stdClass
-     */
-    private $pluginconfig;
 }

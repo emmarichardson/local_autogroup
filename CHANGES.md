@@ -1,3 +1,6 @@
+## v2.7
+    * Solves Issue #37 - thanks to nrosenquist for fix
+
 ## v2.5
   * Solves https://github.com/emmarichardson/local_autogroup/issues/16 default group by
   * This change requires checking your global config field uses correct key now

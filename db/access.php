@@ -21,25 +21,22 @@
  * for multiple groups. Initialising a course object will automatically
  * load each autogroup group for that course into memory.
  *
- * @package    local
- * @subpackage autogroup
- * @author     Mark Ward (me@moodlemark.com)
- * @date       January 2015
+ * @package    local_autogroup
+ * @copyright  Mark Ward (me@moodlemark.com)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$capabilities = array(
-    'local/autogroup:managecourse' => array(
+$capabilities = [
+    'local/autogroup:managecourse' => [
         'riskbitmask'          => RISK_DATALOSS,
         'captype'              => 'write',
         'contextlevel'         => CONTEXT_COURSE,
-        'archetypes'           => array(
+        'archetypes'           => [
             'editingteacher' => CAP_ALLOW,
             'manager'        => CAP_ALLOW
-        ),
+        ],
         'clonepermissionsfrom' => 'moodle/course:managegroups'
-    ),
-);
-
+    ],
+];

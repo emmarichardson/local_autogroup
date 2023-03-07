@@ -21,17 +21,17 @@
  * upon which they may be enrolled and which has auto-grouping
  * configured.
  *
- * @package    local
- * @subpackage autogroup
- * @author     Mark Ward (me@moodlemark.com)
- * @date       December 2014
+ * @package    local_autogroup
+ * @copyright  Mark Ward (me@moodlemark.com)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace local_autogroup\usecase;
 
-use local_autogroup\usecase;
+defined('MOODLE_INTERNAL') || die();
+
 use local_autogroup\domain;
+use local_autogroup\usecase;
 
 require_once($CFG->dirroot . '/local/autogroup/lib.php');
 
@@ -39,15 +39,22 @@ require_once($CFG->dirroot . '/local/autogroup/lib.php');
  * Class verify_user_group_membership
  * @package local_autogroup\usecase
  */
-class verify_course_group_membership extends usecase
-{
+class verify_course_group_membership extends usecase {
+
+    /**
+     * @var domain\user
+     */
+    protected $course;
+    /**
+     * @var \moodle_database
+     */
+    private $db;
 
     /**
      * @param int $courseid
      * @param \moodle_database $db
      */
-    public function __construct($courseid, \moodle_database $db )
-    {
+    public function __construct($courseid, \moodle_database $db) {
         $this->course = new domain\course($courseid, $db);
         $this->db = $db;
     }
@@ -55,23 +62,12 @@ class verify_course_group_membership extends usecase
     /**
      * @return bool
      */
-    public function __invoke()
-    {
-        if(!\local_autogroup\plugin_is_enabled()){
+    public function invoke() {
+        if (!local_autogroup_plugin_is_enabled()) {
             return false;
         }
 
         set_time_limit(500);
         return $this->course->verify_all_group_membership($this->db);
     }
-
-    /**
-     * @var domain\user
-     */
-    protected $course;
-
-    /**
-     * @var \moodle_database
-     */
-    private $db;
 }

@@ -21,10 +21,8 @@
  * for multiple groups. Initialising a course object will automatically
  * load each autogroup group for that course into memory.
  *
- * @package    local
- * @subpackage autogroup
- * @author     Mark Ward (me@moodlemark.com)
- * @date       January 2015
+ * @package    local_autogroup
+ * @copyright  Mark Ward (me@moodlemark.com)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -40,6 +38,11 @@ use \html_writer;
  */
 class autogroup_set_delete extends form {
     /**
+     * @type domain\autogroup_set
+     */
+    protected $_customdata;
+
+    /**
      *
      */
     public function definition() {
@@ -50,6 +53,22 @@ class autogroup_set_delete extends form {
         $this->add_action_buttons(true, get_string('delete'));
     }
 
+    private function add_dialogue() {
+        $mform = $this->_form;
+
+        $mform->addElement('header', 'delete', get_string('delete'));
+
+        $html = html_writer::tag('p', get_string('confirmdelete', 'local_autogroup'));
+        $mform->addElement('html', $html);
+
+        if ($this->_customdata->exists()) {
+            // Offer to preserve existing groups.
+            $mform->addElement('selectyesno', 'cleanupold', get_string('cleanupold', 'local_autogroup'));
+            $mform->setDefault('cleanupold', 1);
+        }
+
+    }
+
     /**
      *
      */
@@ -58,40 +77,4 @@ class autogroup_set_delete extends form {
         $this->set_data($data);
     }
 
-    /**
-     * @param array $data
-     * @param array $files
-     * @return array
-     */
-    public function validation($data, $files) {
-        return parent::validation($data, $files);
-    }
-
-    /**
-     * @return object
-     */
-    public function get_data() {
-        return parent::get_data();
-    }
-
-    private function add_dialogue(){
-        $mform = $this->_form;
-
-        $mform->addElement('header', 'delete', get_string('delete'));
-
-        $html = html_writer::tag('p', get_string('confirmdelete', 'local_autogroup'));
-        $mform->addElement('html',$html);
-
-        if($this->_customdata->exists()) {
-            //offer to preserve existing groups
-            $mform->addElement('selectyesno', 'cleanupold', get_string('cleanupold','local_autogroup'));
-            $mform->setDefault('cleanupold', 1);
-        }
-
-    }
-
-    /**
-     * @type domain\autogroup_set
-     */
-    protected $_customdata;
 }

@@ -21,10 +21,8 @@
  * for multiple groups. Initialising a course object will automatically
  * load each autogroup group for that course into memory.
  *
- * @package    local
- * @subpackage autogroup
- * @author     Mark Ward (me@moodlemark.com)
- * @date       January 2015
+ * @package    local_autogroup
+ * @copyright  Mark Ward (me@moodlemark.com)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -32,7 +30,6 @@ namespace local_autogroup\form;
 
 use local_autogroup\domain;
 use local_autogroup\form;
-use \html_writer;
 
 /**
  * Class course_settings
@@ -40,17 +37,61 @@ use \html_writer;
  */
 class autogroup_set_settings extends form {
     /**
+     * @type domain\autogroup_set
+     */
+    protected $_customdata;
+
+    /**
      *
      */
     public function definition() {
         $this->autogroup_set = $this->get_submitted_data();
 
-        // $this->add_text_intro();
         $this->add_group_by_options();
 
         $this->add_role_options();
 
         $this->add_action_buttons();
+    }
+
+    /**
+     * @throws \coding_exception
+     */
+    private function add_group_by_options() {
+        $mform = &$this->_form;
+
+        $options = $this->_customdata->get_group_by_options();
+
+        $mform->addElement('select', 'groupby', get_string('set_groupby', 'local_autogroup'), $options);
+        $mform->setDefault('groupby', $this->_customdata->grouping_by());
+
+        if ($this->_customdata->exists()) {
+            // Offer to preserve existing groups.
+            $mform->addElement('selectyesno', 'cleanupold', get_string('cleanupold', 'local_autogroup'));
+            $mform->setDefault('cleanupold', 1);
+        }
+    }
+
+    /**
+     * @throws \coding_exception
+     */
+    private function add_role_options() {
+        $mform = &$this->_form;
+
+        $currentroles = $this->_customdata->get_eligible_roles();
+
+        $mform->addElement('header', 'roles', get_string('set_roles', 'local_autogroup'));
+
+        if ($roles = \get_all_roles()) {
+            $roles = \role_fix_names($roles, null, ROLENAME_ORIGINAL);
+            $assignableroles = \get_roles_for_contextlevels(CONTEXT_COURSE);
+            foreach ($roles as $role) {
+                $mform->addElement('checkbox', 'role_' . $role->id, $role->localname);
+                if (in_array($role->id, $currentroles)) {
+                    $mform->setDefault('role_' . $role->id, 1);
+                }
+            }
+        }
     }
 
     /**
@@ -61,64 +102,4 @@ class autogroup_set_settings extends form {
         $this->set_data($data);
     }
 
-    /**
-     * @param array $data
-     * @param array $files
-     * @return array
-     */
-    public function validation($data, $files) {
-        return parent::validation($data, $files);
-    }
-
-    /**
-     * @return object
-     */
-    public function get_data() {
-        return parent::get_data();
-    }
-
-    /**
-     * @throws \coding_exception
-     */
-    private function add_group_by_options(){
-        $mform = & $this->_form;
-
-        $options = $this->_customdata->get_group_by_options();
-
-        $mform->addElement('select', 'groupby', get_string('set_groupby','local_autogroup'), $options);
-        $mform->setDefault('groupby', $this->_customdata->grouping_by());
-
-        if($this->_customdata->exists()) {
-            //offer to preserve existing groups
-            $mform->addElement('selectyesno', 'cleanupold', get_string('cleanupold','local_autogroup'));
-            $mform->setDefault('cleanupold', 1);
-        }
-    }
-
-    /**
-     * @throws \coding_exception
-     */
-    private function add_role_options(){
-        $mform = & $this->_form;
-
-        $currentroles = $this->_customdata->get_eligible_roles();
-
-        $mform->addElement('header', 'roles', get_string('set_roles', 'local_autogroup'));
-
-        if ($roles = \get_all_roles()) {
-            $roles = \role_fix_names($roles, null, ROLENAME_ORIGINAL);
-            $assignableroles = \get_roles_for_contextlevels(CONTEXT_COURSE);
-            foreach ($roles as $role) {
-                $mform->addElement('checkbox', 'role_'.$role->id, $role->localname);
-                if(in_array($role->id, $currentroles)){
-                    $mform->setDefault('role_'.$role->id, 1);
-                }
-            }
-        }
-    }
-
-    /**
-     * @type domain\autogroup_set
-     */
-    protected $_customdata;
 }

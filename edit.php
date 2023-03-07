@@ -21,10 +21,8 @@
  * for multiple groups. Initialising a course object will automatically
  * load each autogroup group for that course into memory.
  *
- * @package    local
- * @subpackage autogroup
- * @author     Mark Ward (me@moodlemark.com)
- * @date       January 2015
+ * @package    local_autogroup
+ * @copyright  Mark Ward (me@moodlemark.com)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -38,19 +36,20 @@
 
 namespace local_autogroup;
 
-require_once(dirname(__FILE__) . '/pageinit.php');
+use context_course;
+use local_autogroup_renderer;
+use moodle_url;
+use stdClass;
 
-use \local_autogroup\domain;
-use \local_autogroup\sort_module;
-use \local_autogroup\form;
-use \local_autogroup\usecase;
-use \local_autogroup_renderer;
-use \moodle_url;
-use \context_course;
-use \stdClass;
+require_once(__DIR__ . '/../../config.php');
 
-if(!plugin_is_enabled()){
-    //do not allow editing for front page.
+require_login();
+
+require_once(__DIR__ . '/locallib.php');
+require_once(__DIR__ . '/renderer.php');
+
+if (!local_autogroup_plugin_is_enabled()) {
+    // Do not allow editing for front page.
     die();
 }
 
@@ -61,32 +60,32 @@ $sortmodule = optional_param('sortmodule', null, PARAM_TEXT);
 
 global $PAGE, $DB, $SITE;
 
-switch($action) {
+switch ($action) {
     case 'edit':
     case 'delete':
-        if($groupsetid < 1){
+        if ($groupsetid < 1) {
             throw new exception\invalid_autogroup_set_argument($groupsetid);
         }
-        $data = $DB->get_record('local_autogroup_set', array('id'=>$groupsetid));
-        $courseid = (int) $data->courseid;
-        $groupset = new domain\autogroup_set($DB,$data);
+        $data = $DB->get_record('local_autogroup_set', array('id' => $groupsetid));
+        $courseid = (int)$data->courseid;
+        $groupset = new domain\autogroup_set($DB, $data);
 
     case 'add':
-        if($courseid < 1 || $courseid == $SITE->id ) {
+        if ($courseid < 1 || $courseid == $SITE->id) {
             throw new exception\invalid_course_argument($courseid);
         }
-        if(!isset($groupset)){
+        if (!isset($groupset)) {
             $groupset = new domain\autogroup_set($DB);
             $groupset->set_course($courseid);
         }
         break;
     default:
-        // do nothing with incorrect actions
+        // Do nothing with incorrect actions.
         die();
 }
 
-// set the sort module if it doesn't match
-if($sortmodule && $groupset->sortmoduleshortname != $sortmodule){
+// Set the sort module if it doesn't match.
+if ($sortmodule && $groupset->sortmoduleshortname != $sortmodule) {
     $groupset->set_sort_module($sortmodule);
 }
 
@@ -98,10 +97,8 @@ $course = $DB->get_record('course', array('id' => $courseid));
 
 $heading = \get_string('coursesettingstitle', 'local_autogroup', $course->shortname);
 
-global $PAGE;
-
 $PAGE->set_context($context);
-$PAGE->set_url(local_autogroup_renderer::URL_COURSE_SETTINGS, array('courseid'=>$courseid));
+$PAGE->set_url(local_autogroup_renderer::URL_COURSE_SETTINGS, array('courseid' => $courseid));
 $PAGE->set_title($heading);
 $PAGE->set_heading($heading);
 $PAGE->set_pagelayout('incourse');
@@ -110,20 +107,18 @@ $PAGE->set_course($course);
 $output = $PAGE->get_renderer('local_autogroup');
 
 $returnparams = array('action' => $action, 'sortmodule' => $sortmodule);
-if($groupset->exists()){
+if ($groupset->exists()) {
     $returnparams['gsid'] = $groupset->id;
-}
-else {
+} else {
     $returnparams['courseid'] = $courseid;
 }
 
 $returnurl = new moodle_url(local_autogroup_renderer::URL_COURSE_SETTINGS, $returnparams);
 $aborturl = new moodle_url(local_autogroup_renderer::URL_COURSE_MANAGE, array('courseid' => $courseid));
 
-if($action == 'delete'){
+if ($action == 'delete') {
     $form = new form\autogroup_set_delete($returnurl, $groupset);
-}
-else {
+} else {
     $form = new form\autogroup_set_settings($returnurl, $groupset);
 }
 
@@ -132,33 +127,32 @@ if ($form->is_cancelled()) {
 }
 if ($data = $form->get_data()) {
 
-    // data relevant to both form types
+    // Data relevant to both form types.
     $updategroupmembership = false;
     $cleanupold = isset($data->cleanupold) ? (bool)$data->cleanupold : true;
 
-    if($action == 'delete') {
-        // user has selected "dont group"
+    if ($action == 'delete') {
+        // User has selected "dont group".
         $groupset->delete($DB, $cleanupold);
 
         $groupset = new domain\autogroup_set($DB);
         $groupset->set_course($courseid);
 
         $updategroupmembership = true;
-    }
-    else {
+    } else {
 
         $options = new stdClass();
         $options->field = $data->groupby;
 
         if ($options->field != $groupset->grouping_by()) {
-            // user has selected another option
+            // User has selected another option.
             $groupset->set_options($options);
             $groupset->save($DB, $cleanupold);
 
             $updategroupmembership = true;
         }
 
-        // check for role settings
+        // Check for role settings.
         if ($groupset->exists() && $roles = \get_all_roles()) {
             $roles = \role_fix_names($roles, null, ROLENAME_ORIGINAL);
             $newroles = array();
@@ -180,7 +174,7 @@ if ($data = $form->get_data()) {
 
     if ($updategroupmembership) {
         $usecase = new usecase\verify_course_group_membership($courseid, $DB);
-        $usecase();
+        $usecase->invoke();
     }
 
     redirect($aborturl);

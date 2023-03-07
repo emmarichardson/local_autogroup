@@ -21,17 +21,15 @@
  * upon which they may be enrolled and which has auto-grouping
  * configured.
  *
- * @package    local
- * @subpackage autogroup
- * @author     Mark Ward (me@moodlemark.com)
- * @date       December 2014
+ * @package    local_autogroup
+ * @copyright  Mark Ward (me@moodlemark.com)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version = 2022040500;
+$plugin->version = 2022062500.01;
 $plugin->requires = 2013111800.00;       // Requires this Moodle version (2.7).
-$plugin->release = '2.6';                // Plugin release.
+$plugin->release = '2.7';                // Plugin release.
 $plugin->component = 'local_autogroup';  // Full name of the plugin (used for diagnostics).
 $plugin->maturity = MATURITY_STABLE;

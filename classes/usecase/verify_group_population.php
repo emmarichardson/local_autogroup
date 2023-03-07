@@ -21,17 +21,17 @@
  * upon which they may be enrolled and which has auto-grouping
  * configured.
  *
- * @package    local
- * @subpackage autogroup
- * @author     Mark Ward (me@moodlemark.com)
- * @date       December 2014
+ * @package    local_autogroup
+ * @copyright  Mark Ward (me@moodlemark.com)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace local_autogroup\usecase;
 
-use local_autogroup\usecase;
+defined('MOODLE_INTERNAL') || die();
+
 use local_autogroup\domain;
+use local_autogroup\usecase;
 
 require_once($CFG->dirroot . '/local/autogroup/lib.php');
 
@@ -39,18 +39,25 @@ require_once($CFG->dirroot . '/local/autogroup/lib.php');
  * Class verify_group_population
  * @package local_autogroup\usecase
  */
-class verify_group_population extends usecase
-{
+class verify_group_population extends usecase {
+    /**
+     * @var domain\group
+     */
+    private $group;
+    /**
+     * @var bool $redirect
+     */
+    private $redirect = false;
+
     /**
      * @param int $groupid
      * @param \moodle_database $db
      */
-    public function __construct($groupid, \moodle_database $db, \moodle_page $page)
-    {
+    public function __construct($groupid, \moodle_database $db, \moodle_page $page) {
         $this->group = new domain\group($groupid, $db);
 
-        //if we are viewing the group members we should redirect to safety
-        if($page->has_set_url() && strstr($page->url, 'group/members.php?group=' . $groupid)) {
+        // If we are viewing the group members we should redirect to safety.
+        if ($page->has_set_url() && strstr($page->url, 'group/members.php?group=' . $groupid)) {
             $this->redirect = true;
         }
     }
@@ -58,30 +65,19 @@ class verify_group_population extends usecase
     /**
      * @return void
      */
-    public function __invoke()
-    {
-        if(!\local_autogroup\plugin_is_enabled()){
+    public function invoke() {
+        if (!local_autogroup_plugin_is_enabled()) {
             return;
         }
 
         $removed = false;
-        if($this->group->membership_count() == 0){
+        if ($this->group->membership_count() == 0) {
             $removed = $this->group->remove();
         }
 
-        if($removed && $this->redirect){
-            $url = new \moodle_url('/group/index.php',array('id'=>$this->group->courseid));
+        if ($removed && $this->redirect) {
+            $url = new \moodle_url('/group/index.php', array('id' => $this->group->courseid));
             \redirect($url);
         }
     }
-
-    /**
-     * @var domain\group
-     */
-    private $group;
-
-    /**
-     * @var bool $redirect
-     */
-    private $redirect = false;
 }
