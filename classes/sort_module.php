@@ -54,6 +54,10 @@ abstract class sort_module {
      * @var array
      */
     protected $config = array();
+    /**
+     * @var array
+     */
+    protected $delimiters = [];
 
     /**
      * @param stdClass $config
@@ -110,4 +114,28 @@ abstract class sort_module {
      */
     abstract public function grouping_by();
 
+    /**
+     * Return display string which explains how users are being grouped
+     *
+     * @return string
+     */
+    abstract public function grouping_by_text();
+
+    /**
+     * Get array of delimiter string.
+     *
+     * @return array
+     */
+    public function get_delimiter_options() {
+        return array_combine($this->delimiters, $this->delimiters);
+    }
+
+    /**
+     * Get delimiter string.
+     *
+     * @return string
+     */
+    public function delimited_by() {
+        return '';
+    }
 }

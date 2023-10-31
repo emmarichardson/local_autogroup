@@ -141,10 +141,18 @@ if ($data = $form->get_data()) {
         $updategroupmembership = true;
     } else {
 
+        $updated = false;
         $options = new stdClass();
-        $options->field = $data->groupby;
+        if (!empty($data->groupby) && $data->groupby != $groupset->grouping_by()) {
+            $options->field = $data->groupby;
+            $updated = true;
+        }
+        if (!empty($data->delimitedby) && $data->delimitedby != $groupset->delimited_by()) {
+            $options->delimiter = $data->delimitedby;
+            $updated = true;
+        }
 
-        if ($options->field != $groupset->grouping_by()) {
+        if ($updated) {
             // User has selected another option.
             $groupset->set_options($options);
             $groupset->save($DB, $cleanupold);

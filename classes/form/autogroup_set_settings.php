@@ -49,6 +49,8 @@ class autogroup_set_settings extends form {
 
         $this->add_group_by_options();
 
+        $this->add_field_delimiter_options();
+
         $this->add_role_options();
 
         $this->add_action_buttons();
@@ -69,6 +71,20 @@ class autogroup_set_settings extends form {
             // Offer to preserve existing groups.
             $mform->addElement('selectyesno', 'cleanupold', get_string('cleanupold', 'local_autogroup'));
             $mform->setDefault('cleanupold', 1);
+        }
+    }
+
+    /**
+     * Add delimiter options if the sortmodule has the option.
+     *
+     * @return void
+     */
+    protected function add_field_delimiter_options() {
+        $delimiteroptions = $this->_customdata->get_delimited_by_options();
+        if ($delimiteroptions) {
+            $mform = &$this->_form;
+            $mform->addElement('select', 'delimitedby', get_string('set_delimitedby', 'local_autogroup'), $delimiteroptions);
+            $mform->setDefault('delimitedby', $this->_customdata->delimited_by());
         }
     }
 

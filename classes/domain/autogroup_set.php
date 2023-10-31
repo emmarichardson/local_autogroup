@@ -330,6 +330,16 @@ class autogroup_set extends domain {
     }
 
     /**
+     * Returns the options to be displayed on the autgroup_set
+     * editing form. These are defined per-module.
+     *
+     * @return array
+     */
+    public function get_delimited_by_options() {
+        return $this->sortmodule->get_delimiter_options();
+    }
+
+    /**
      * @return int  the count of groups linked to this groupset
      */
     public function get_group_count() {
@@ -348,13 +358,32 @@ class autogroup_set extends domain {
     }
 
     /**
-     * returns the name of the field this is currently
+     * returns the actual value of the field this is currently
      * grouping by.
      *
      * @return string
      */
     public function grouping_by() {
         return $this->sortmodule->grouping_by();
+    }
+
+    /**
+     * returns the display name of the field this is currently
+     * grouping by.
+     *
+     * @return string
+     */
+    public function grouping_by_text() {
+        return $this->sortmodule->grouping_by_text();
+    }
+
+    /**
+     * returns delimiter.
+     *
+     * @return string
+     */
+    public function delimited_by() {
+        return $this->sortmodule->delimited_by();
     }
 
     /**

@@ -45,6 +45,7 @@ $string['set_type'] = 'Group set type';
 $string['set_groups'] = 'Number of groups';
 $string['set_roles'] = 'Eligible Roles';
 $string['set_groupby'] = 'Group by';
+$string['set_delimitedby'] = 'Delimited by';
 
 $string['confirmdelete'] = 'Are you sure you wish to remove this auto group set?';
 
@@ -84,6 +85,7 @@ $string['lang'] = "Preferred Language";
 // Sort module names.
 $string['sort_module:profile_field'] = 'Profile field';
 $string['sort_module:user_info_field'] = 'Custom profile field';
+$string['sort_module:user_info_field_multivalue'] = 'Custom profile field multi values';
 
 // Privacy provider
 $string['privacy:metadata:local_autogroup'] = 'Data relating users for the local autogroup plugin';

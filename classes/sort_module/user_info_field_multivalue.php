@@ -22,7 +22,8 @@
  * load each autogroup group for that course into memory.
  *
  * @package    local_autogroup
- * @copyright  Mark Ward (me@moodlemark.com)
+ * @copyright  2023 Catalyst IT Australia Pty Ltd
+ * @author     Tomo Tsuyuki <tomotsuyuki@catalyst-au.net>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -35,11 +36,19 @@ use stdClass;
  * Class course
  * @package local_autogroup\domain
  */
-class profile_field extends sort_module {
+class user_info_field_multivalue extends sort_module {
     /**
      * @var string
      */
     private $field = '';
+    /**
+     * @var string
+     */
+    private $delimiter = '';
+    /**
+     * @var array
+     */
+    protected $delimiters = [',', '|',';'];
 
     /**
      * @param stdClass $config
@@ -48,6 +57,7 @@ class profile_field extends sort_module {
     public function __construct($config, $courseid) {
         if ($this->config_is_valid($config)) {
             $this->field = $config->field;
+            $this->delimiter = empty($config->delimiter) ? '' : $config->delimiter;
         }
         $this->courseid = (int)$courseid;
     }
@@ -76,13 +86,14 @@ class profile_field extends sort_module {
      * @return array
      */
     public function get_config_options() {
-        $options = [
-            'auth' => get_string('auth', 'local_autogroup'),
-            'department' => get_string('department', 'local_autogroup'),
-            'institution' => get_string('institution', 'local_autogroup'),
-            'lang' => get_string('lang', 'local_autogroup'),
-            'city' => get_string('city', 'local_autogroup'),
-        ];
+        global $DB;
+
+        $options = [];
+        $infofields = $DB->get_records('user_info_field', ['datatype' => 'text']);
+
+        foreach ($infofields as $field) {
+            $options[$field->id] = $field->name;
+        }
         return $options;
     }
 
@@ -91,9 +102,17 @@ class profile_field extends sort_module {
      * @return array $result
      */
     public function eligible_groups_for_user(stdClass $user) {
+        global $DB;
+
         $field = $this->field;
-        if (isset($user->$field) && !empty($user->$field)) {
-            return [$user->$field];
+        if (empty($field)) {
+            return [];
+        }
+        $data = $DB->get_record('user_info_data', ['fieldid' => $field, 'userid' => $user->id]);
+        if ($data && !empty($data->data)) {
+            $delimiteddata = explode($this->delimiter, $data->data);
+            $trimmeddata = array_map('trim', $delimiteddata);
+            return $trimmeddata;
         }
         return [];
     }
@@ -109,10 +128,25 @@ class profile_field extends sort_module {
      * @return bool|string
      */
     public function grouping_by_text() {
+        global $DB;
         if (empty ($this->field)) {
             return false;
         }
-        $options = $this->get_config_options();
-        return isset($options[$this->field]) ? $options[$this->field] : $this->field;
+
+        $field = $DB->get_field('user_info_field', 'name', ['id' => $this->field]);
+        if (empty($field)) {
+            return false;
+        }
+        return (string)$field;
     }
+
+    /**
+     * Get delimiter string.
+     *
+     * @return string
+     */
+    public function delimited_by() {
+        return $this->delimiter;
+    }
+
 }
