@@ -30,6 +30,7 @@ namespace local_autogroup;
 
 use \core\event;
 use local_autogroup\domain\group;
+use local_autogroup\task\process_event;
 
 /**
  * Class event_handler
@@ -43,11 +44,23 @@ use local_autogroup\domain\group;
  * @package local_autogroup
  */
 class event_handler {
+
     /**
-     * @param event\user_enrolment_created $event
+     * @var array
+     */
+    const FUNCTION_MAPPING = [
+        'group_deleted' => 'group_change',
+        'group_updated' => 'group_change',
+        'role_assigned' => 'role_change',
+        'role_unassigned' => 'role_change',
+        'role_deleted' => 'role_deleted',
+    ];
+
+    /**
+     * @param object $event
      * @return mixed
      */
-    public static function user_enrolment_created(event\user_enrolment_created $event) {
+    public static function user_enrolment_created(object $event) {
         $pluginconfig = get_config('local_autogroup');
         if (!$pluginconfig->listenforrolechanges) {
             return false;
@@ -63,12 +76,12 @@ class event_handler {
     }
 
     /**
-     * @param event\group_member_added $event
+     * @param object $event
      * @return bool
      * @throws \Exception
      * @throws \dml_exception
      */
-    public static function group_member_added(event\group_member_added $event) {
+    public static function group_member_added(object $event) {
         if (self::triggered_by_autogroup($event)) {
             return false;
         }
@@ -99,12 +112,12 @@ class event_handler {
     }
 
     /**
-     * @param event\group_member_removed $event
+     * @param object $event
      * @return bool
      * @throws \Exception
      * @throws \dml_exception
      */
-    public static function group_member_removed(event\group_member_removed $event) {
+    public static function group_member_removed(object $event) {
         if (self::triggered_by_autogroup($event)) {
             return false;
         }
@@ -135,10 +148,10 @@ class event_handler {
     }
 
     /**
-     * @param event\user_updated $event
+     * @param object $event
      * @return mixed
      */
-    public static function user_updated(event\user_updated $event) {
+    public static function user_updated(object $event) {
         $pluginconfig = get_config('local_autogroup');
         if (!$pluginconfig->listenforuserprofilechanges) {
             return false;
@@ -153,12 +166,12 @@ class event_handler {
     }
 
     /**
-     * @param event\base $event
+     * @param object $event
      * @return bool
      * @throws \Exception
      * @throws \dml_exception
      */
-    public static function group_created(event\base $event) {
+    public static function group_created(object $event) {
         if (self::triggered_by_autogroup($event)) {
             return false;
         }
@@ -177,12 +190,12 @@ class event_handler {
     }
 
     /**
-     * @param event\base $event
+     * @param object $event
      * @return bool
      * @throws \Exception
      * @throws \dml_exception
      */
-    public static function group_change(event\base $event) {
+    public static function group_change(object $event) {
         if (self::triggered_by_autogroup($event)) {
             return false;
         }
@@ -212,10 +225,10 @@ class event_handler {
     }
 
     /**
-     * @param event\base $event
+     * @param object $event
      * @return mixed
      */
-    public static function role_change(event\base $event) {
+    public static function role_change(object $event) {
         $pluginconfig = get_config('local_autogroup');
         if (!$pluginconfig->listenforrolechanges) {
             return false;
@@ -230,10 +243,10 @@ class event_handler {
     }
 
     /**
-     * @param event\role_deleted $event
+     * @param object $event
      * @return mixed
      */
-    public static function role_deleted(event\role_deleted $event) {
+    public static function role_deleted(object $event) {
         global $DB;
 
         $DB->delete_records('local_autogroup_roles', ['roleid' => $event->objectid]);
@@ -243,10 +256,10 @@ class event_handler {
     }
 
     /**
-     * @param event\course_created $event
+     * @param object $event
      * @return mixed
      */
-    public static function course_created(event\course_created $event) {
+    public static function course_created(object $event) {
         $config = get_config('local_autogroup');
         if (!$config->addtonewcourses) {
             return false;
@@ -260,10 +273,10 @@ class event_handler {
     }
 
     /**
-     * @param event\course_restored $event
+     * @param object $event
      * @return mixed
      */
-    public static function course_restored(event\course_restored $event) {
+    public static function course_restored(object $event) {
         $config = get_config('local_autogroup');
         if (!$config->addtorestoredcourses) {
             return false;
@@ -277,10 +290,10 @@ class event_handler {
     }
 
     /**
-     * @param \totara_core\event\position_updated $event
+     * @param object $event
      * @return bool
      */
-    public static function position_updated(\totara_core\event\position_updated $event) {
+    public static function position_updated(object $event) {
         $pluginconfig = get_config('local_autogroup');
         if (!$pluginconfig->listenforuserpositionchanges) {
             return false;
@@ -298,21 +311,39 @@ class event_handler {
      * Checks the data of an event to see whether it was initiated
      * by the local_autogroup component
      *
-     * @param event\base $event
+     * @param object $data
      * @return bool
      */
-    private static function triggered_by_autogroup(\core\event\base $event) {
-        $data = $event->get_data();
-        if (
-            isset($data['other']) &&
-            is_array($data['other']) &&
-            isset($data['other']['component']) &&
-            is_string($data['other']['component']) &&
-            strstr($data['other']['component'], 'autogroup')
-        ) {
-            return true;
-        }
+    private static function triggered_by_autogroup(object $data) {
+        return !empty($data->other->component) && strstr($data->other->component, 'autogroup');
+    }
 
-        return false;
+    /**
+     * Create ad hoc task for event.
+     * 
+     * @param event\base $event
+     * @return void
+     */
+    public static function create_adhoc_task(\core\event\base $event) {
+
+        $task = new process_event();
+        $task->set_custom_data($event->get_data());
+        $queryadhoc = get_config('local_autogroup', 'adhoceventhandler');
+        if (!empty($queryadhoc)) {
+            \core\task\manager::queue_adhoc_task($task);
+        } else {
+            $task->execute();
+        }
+    }
+
+    /**
+     * @param object $event
+     * @return mixed
+     */
+    public static function process_event(object $event) {
+        $explodename = explode('\\', $event->eventname);
+        $eventname = end($explodename);
+        $functionname = self::FUNCTION_MAPPING[$eventname] ?? $eventname;
+        self::$functionname($event);
     }
 }

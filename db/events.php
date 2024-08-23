@@ -32,7 +32,7 @@ $observers = [
 
     [
         'eventname' => '\core\event\user_enrolment_created',
-        'callback' => '\local_autogroup\event_handler::user_enrolment_created',
+        'callback' => '\local_autogroup\event_handler::create_adhoc_task',
         'includefile' => 'local/autogroup/classes/event_handler.php',
         'internal' => true,
         'priority' => 0,
@@ -40,7 +40,7 @@ $observers = [
 
     [
         'eventname' => 'core\event\group_member_added',
-        'callback' => '\local_autogroup\event_handler::group_member_added',
+        'callback' => '\local_autogroup\event_handler::create_adhoc_task',
         'includefile' => 'local/autogroup/classes/event_handler.php',
         'internal' => true,
         'priority' => 0,
@@ -48,7 +48,7 @@ $observers = [
 
     [
         'eventname' => '\core\event\group_member_removed',
-        'callback' => '\local_autogroup\event_handler::group_member_removed',
+        'callback' => '\local_autogroup\event_handler::create_adhoc_task',
         'includefile' => 'local/autogroup/classes/event_handler.php',
         'internal' => true,
         'priority' => 0,
@@ -56,7 +56,7 @@ $observers = [
 
     [
         'eventname' => '\core\event\user_updated',
-        'callback' => '\local_autogroup\event_handler::user_updated',
+        'callback' => '\local_autogroup\event_handler::create_adhoc_task',
         'includefile' => 'local/autogroup/classes/event_handler.php',
         'internal' => true,
         'priority' => 0,
@@ -64,7 +64,7 @@ $observers = [
 
     [
         'eventname' => '\core\event\group_created',
-        'callback' => '\local_autogroup\event_handler::group_created',
+        'callback' => '\local_autogroup\event_handler::create_adhoc_task',
         'includefile' => 'local/autogroup/classes/event_handler.php',
         'internal' => true,
         'priority' => 0,
@@ -72,7 +72,7 @@ $observers = [
 
     [
         'eventname' => '\core\event\group_deleted',
-        'callback' => '\local_autogroup\event_handler::group_change',
+        'callback' => '\local_autogroup\event_handler::create_adhoc_task',
         'includefile' => 'local/autogroup/classes/event_handler.php',
         'internal' => true,
         'priority' => 0,
@@ -80,7 +80,7 @@ $observers = [
 
     [
         'eventname' => '\core\event\group_updated',
-        'callback' => '\local_autogroup\event_handler::group_change',
+        'callback' => '\local_autogroup\event_handler::create_adhoc_task',
         'includefile' => 'local/autogroup/classes/event_handler.php',
         'internal' => true,
         'priority' => 0,
@@ -88,7 +88,7 @@ $observers = [
 
     [
         'eventname' => '\core\event\role_assigned',
-        'callback' => '\local_autogroup\event_handler::role_change',
+        'callback' => '\local_autogroup\event_handler::create_adhoc_task',
         'includefile' => 'local/autogroup/classes/event_handler.php',
         'internal' => true,
         'priority' => 0,
@@ -96,7 +96,7 @@ $observers = [
 
     [
         'eventname' => '\core\event\role_unassigned',
-        'callback' => '\local_autogroup\event_handler::role_change',
+        'callback' => '\local_autogroup\event_handler::create_adhoc_task',
         'includefile' => 'local/autogroup/classes/event_handler.php',
         'internal' => true,
         'priority' => 0,
@@ -104,7 +104,7 @@ $observers = [
 
     [
         'eventname' => '\core\event\role_deleted',
-        'callback' => '\local_autogroup\event_handler::role_deleted',
+        'callback' => '\local_autogroup\event_handler::create_adhoc_task',
         'includefile' => 'local/autogroup/classes/event_handler.php',
         'internal' => true,
         'priority' => 0,
@@ -112,7 +112,7 @@ $observers = [
 
     [
         'eventname' => '\core\event\course_created',
-        'callback' => '\local_autogroup\event_handler::course_created',
+        'callback' => '\local_autogroup\event_handler::create_adhoc_task',
         'includefile' => 'local/autogroup/classes/event_handler.php',
         'internal' => true,
         'priority' => 0,
@@ -120,7 +120,7 @@ $observers = [
 
     [
         'eventname' => '\core\event\course_restored',
-        'callback' => '\local_autogroup\event_handler::course_restored',
+        'callback' => '\local_autogroup\event_handler::create_adhoc_task',
         'includefile' => 'local/autogroup/classes/event_handler.php',
         'internal' => true,
         'priority' => 0,
@@ -128,7 +128,7 @@ $observers = [
 
     [
         'eventname' => '\totara_core\event\position_updated',
-        'callback' => '\local_autogroup\event_handler::position_updated',
+        'callback' => '\local_autogroup\event_handler::create_adhoc_task',
         'includefile' => 'local/autogroup/classes/event_handler.php',
         'internal' => true,
         'priority' => 0,

@@ -82,6 +82,15 @@ if ($hassiteconfig) {
         )
     );
 
+    $settings->add(
+        new admin_setting_configcheckbox(
+            'local_autogroup/adhoceventhandler',
+            get_string('adhoceventhandler', 'local_autogroup'),
+            '',
+            0
+        )
+    );
+
     // Default settings.
     $settings->add(
         new admin_setting_heading(
