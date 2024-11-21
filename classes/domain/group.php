@@ -178,7 +178,7 @@ class group extends domain {
         }
 
         // User was not found as a member so will now make member a user.
-        \groups_add_member($this->as_object(), $userid, 'local_autogroup');
+        \groups_add_member($this->as_object()->id, $userid, 'local_autogroup');
         return true;
     }
 

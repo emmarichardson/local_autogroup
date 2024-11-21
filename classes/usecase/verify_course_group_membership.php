@@ -67,7 +67,7 @@ class verify_course_group_membership extends usecase {
             return false;
         }
 
-        set_time_limit(500);
+        !PHPUNIT_TEST ? set_time_limit(500) : null;
         return $this->course->verify_all_group_membership($this->db);
     }
 }
