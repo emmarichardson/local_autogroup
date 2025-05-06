@@ -120,7 +120,7 @@ function local_autogroup_amend_settings_structure(settings_navigation $settingsn
                 );
 
                 $groupparentnode->type = navigation_node::TYPE_UNKNOWN;
-                $groupparentnode->url = null;
+               // $groupparentnode->url = null;
                 $groupparentnode->action = null;
                 $groupparentnode->key = 'groupsparent';
 
