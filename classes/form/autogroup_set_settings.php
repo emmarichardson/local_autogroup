@@ -44,6 +44,9 @@ class autogroup_set_settings extends form {
     /**
      *
      */
+    /** @var \local_autogroup\local\autogroup_set|null */
+    protected $autogroup_set;
+    
     public function definition() {
         $this->autogroup_set = $this->get_submitted_data();
 
