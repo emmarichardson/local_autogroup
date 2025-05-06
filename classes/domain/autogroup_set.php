@@ -517,11 +517,6 @@ class autogroup_set extends domain {
                 return [$group, false];
             }
         }
-        $group = $db->get_record('groups', array('courseid' => $this->courseid, 'idnumber' => $idnumber));
-        if (!empty($group)) {
-            $this->groups[$group->id] = new domain\group($group, $db);
-            return [$this->groups[$group->id], false];
-        }
 
         // If we don't find a match, create a new group.
         $data = new \stdclass();
