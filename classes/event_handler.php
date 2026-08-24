@@ -71,6 +71,13 @@ class event_handler {
         $courseid = (int)$event->courseid;
         $userid = (int)$event->relateduserid;
 
+        if (
+            !$DB->record_exists('course', ['id' => $courseid])
+            || !$DB->record_exists('user', ['id' => $userid, 'deleted' => 0])
+        ) {
+            return false;
+        }
+
         $usecase = new usecase\verify_user_group_membership($userid, $DB, $courseid);
         return $usecase->invoke();
     }
@@ -92,6 +99,15 @@ class event_handler {
         // Add to manually assigned list (local_autogroup_manual).
         $userid = (int)$event->relateduserid;
         $groupid = (int)$event->objectid;
+        $courseid = (int)$event->courseid;
+
+        if (
+            !$DB->record_exists('course', ['id' => $courseid])
+            || !$DB->record_exists('user', ['id' => $userid, 'deleted' => 0])
+            || !$DB->record_exists('groups', ['id' => $groupid, 'courseid' => $courseid])
+        ) {
+            return false;
+        }
 
         $group = new group($groupid, $DB);
         if ($group->is_valid_autogroup($DB) &&
@@ -103,9 +119,6 @@ class event_handler {
         if (!$pluginconfig->listenforgroupmembership) {
             return false;
         }
-
-        $courseid = (int)$event->courseid;
-        $userid = (int)$event->relateduserid;
 
         $usecase = new usecase\verify_user_group_membership($userid, $DB, $courseid);
         return $usecase->invoke();
@@ -137,13 +150,19 @@ class event_handler {
         $courseid = (int)$event->courseid;
         $userid = (int)$event->relateduserid;
 
-        if ($pluginconfig->listenforgroupmembership) {
+        $courseexists = $DB->record_exists('course', ['id' => $courseid]);
+        $userexists = $DB->record_exists('user', ['id' => $userid, 'deleted' => 0]);
+        $groupexists = $DB->record_exists('groups', ['id' => $groupid, 'courseid' => $courseid]);
+
+        if ($pluginconfig->listenforgroupmembership && $courseexists && $userexists) {
             $usecase1 = new usecase\verify_user_group_membership($userid, $DB, $courseid);
             $usecase1->invoke();
         }
 
-        $usecase2 = new usecase\verify_group_population($groupid, $DB, $PAGE);
-        $usecase2->invoke();
+        if ($courseexists && $groupexists) {
+            $usecase2 = new usecase\verify_group_population($groupid, $DB, $PAGE);
+            $usecase2->invoke();
+        }
         return true;
     }
 
@@ -160,6 +179,10 @@ class event_handler {
         global $DB;
 
         $userid = (int)$event->relateduserid;
+
+        if (!$DB->record_exists('user', ['id' => $userid, 'deleted' => 0])) {
+            return false;
+        }
 
         $usecase = new usecase\verify_user_group_membership($userid, $DB);
         return $usecase->invoke();
@@ -185,6 +208,10 @@ class event_handler {
 
         $groupid = (int)$event->objectid;
 
+        if (!$DB->record_exists('groups', ['id' => $groupid])) {
+            return false;
+        }
+
         $usecase = new usecase\verify_group_idnumber($groupid, $DB, $PAGE);
         return $usecase->invoke();
     }
@@ -208,6 +235,11 @@ class event_handler {
         // Remove from manually assigned list (local_autogroup_manual).
         if ($event->eventname === '\core\event\group_deleted') {
             $DB->delete_records('local_autogroup_manual', array('groupid' => $groupid));
+        }
+
+        // The course may have been deleted after this event was queued.
+        if (!$DB->record_exists('course', ['id' => $courseid])) {
+            return false;
         }
 
         $pluginconfig = get_config('local_autogroup');
@@ -238,6 +270,10 @@ class event_handler {
 
         $userid = (int)$event->relateduserid;
 
+        if (!$DB->record_exists('user', ['id' => $userid, 'deleted' => 0])) {
+            return false;
+        }
+
         $usecase = new usecase\verify_user_group_membership($userid, $DB);
         return $usecase->invoke();
     }
@@ -256,6 +292,47 @@ class event_handler {
     }
 
     /**
+     * Remove plugin data belonging to a deleted user.
+     *
+     * @param object $event
+     * @return bool
+     */
+    public static function user_deleted(object $event) {
+        global $DB;
+
+        $DB->delete_records('local_autogroup_manual', ['userid' => (int)$event->objectid]);
+
+        return true;
+    }
+
+    /**
+     * Remove plugin configuration belonging to a deleted course.
+     *
+     * @param object $event
+     * @return bool
+     */
+    public static function course_deleted(object $event) {
+        global $DB;
+
+        $courseid = (int)$event->objectid;
+        $setids = $DB->get_fieldset_select(
+            'local_autogroup_set',
+            'id',
+            'courseid = :courseid',
+            ['courseid' => $courseid]
+        );
+
+        if ($setids) {
+            [$insql, $params] = $DB->get_in_or_equal($setids, SQL_PARAMS_NAMED, 'setid');
+            $DB->delete_records_select('local_autogroup_roles', "setid {$insql}", $params);
+        }
+
+        $DB->delete_records('local_autogroup_set', ['courseid' => $courseid]);
+
+        return true;
+    }
+
+    /**
      * @param object $event
      * @return mixed
      */
@@ -267,6 +344,10 @@ class event_handler {
 
         global $DB;
         $courseid = (int)$event->courseid;
+
+        if (!$DB->record_exists('course', ['id' => $courseid])) {
+            return false;
+        }
 
         $usecase = new usecase\add_default_to_course($courseid, $DB);
         return $usecase->invoke();
@@ -285,6 +366,10 @@ class event_handler {
         global $DB;
         $courseid = (int)$event->courseid;
 
+        if (!$DB->record_exists('course', ['id' => $courseid])) {
+            return false;
+        }
+
         $usecase = new usecase\add_default_to_course($courseid, $DB);
         return $usecase->invoke();
     }
@@ -302,6 +387,10 @@ class event_handler {
         global $DB;
 
         $userid = (int)$event->relateduserid;
+
+        if (!$DB->record_exists('user', ['id' => $userid, 'deleted' => 0])) {
+            return false;
+        }
 
         $usecase = new usecase\verify_user_group_membership($userid, $DB);
         return $usecase->invoke();

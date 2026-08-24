@@ -85,12 +85,19 @@ class user extends domain {
         // TODO: restructure to allow usage of custom profile fields.
 
         if (is_int($user) && $user > 0) {
+            $record = $db->get_record('user', array('id' => $user, 'deleted' => 0));
+            if (!$record) {
+                throw new exception\invalid_user_argument($user);
+            }
             $this->id = $user;
-            $this->object = $db->get_record('user', array('id' => $user));
+            $this->object = $record;
             return true;
         }
 
         if (is_object($user) && isset($user->id) && $user->id > 0) {
+            if (!$db->record_exists('user', ['id' => $user->id, 'deleted' => 0])) {
+                throw new exception\invalid_user_argument($user);
+            }
             $this->id = $user->id;
             $this->object = $user;
             return true;

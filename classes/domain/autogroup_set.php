@@ -254,10 +254,19 @@ class autogroup_set extends domain {
             return false;
         }
 
+        $groupids = [];
+        foreach ($this->groups as $group) {
+            $groupids[] = $group->id;
+        }
+
+        if ($groupids) {
+            [$insql, $params] = $db->get_in_or_equal($groupids, SQL_PARAMS_NAMED, 'groupid');
+            $db->delete_records_select('local_autogroup_manual', "groupid {$insql}", $params);
+        }
+
         // This has to be done first to prevent event handler getting in the way.
         $db->delete_records('local_autogroup_set', array('id' => $this->id));
         $db->delete_records('local_autogroup_roles', array('setid' => $this->id));
-        $db->delete_records('local_autogroup_manual', array('groupid' => $this->id));
 
         if ($cleanupgroups) {
             foreach ($this->groups as $k => $group) {

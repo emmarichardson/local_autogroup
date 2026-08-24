@@ -127,6 +127,11 @@ class group extends domain {
      */
     private function load_from_database($groupid, \moodle_database $db) {
         $group = $db->get_record('groups', array('id' => $groupid));
+
+        if (!$group) {
+            throw new exception\invalid_group_argument($groupid);
+        }
+
         if ($this->validate_object($group)) {
             $this->load_from_object($group);
         }

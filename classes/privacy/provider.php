@@ -168,7 +168,7 @@ class provider implements
             // If not in course context, skip context.
             if ($context instanceof \context_course) {
                 if (!$DB->record_exists('groups', ['courseid' => $context->instanceid])) {
-                    return;
+                    continue;
                 }
 
                 $select = "userid = :userid AND groupid IN (SELECT g.id FROM {groups} g WHERE courseid = :courseid)";

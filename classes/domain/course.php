@@ -62,6 +62,10 @@ class course extends domain {
         // Get the id for this course.
         $this->parse_course_id($course);
 
+        if (!$db->record_exists('course', ['id' => $this->id])) {
+            throw new exception\invalid_course_argument($course);
+        }
+
         $this->context = \context_course::instance($this->id);
 
         // Load autogroup groups for this course.

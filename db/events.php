@@ -63,6 +63,14 @@ $observers = [
     ],
 
     [
+        'eventname' => '\core\event\user_deleted',
+        'callback' => '\local_autogroup\event_handler::create_adhoc_task',
+        'includefile' => 'local/autogroup/classes/event_handler.php',
+        'internal' => true,
+        'priority' => 0,
+    ],
+
+    [
         'eventname' => '\core\event\group_created',
         'callback' => '\local_autogroup\event_handler::create_adhoc_task',
         'includefile' => 'local/autogroup/classes/event_handler.php',
@@ -112,6 +120,14 @@ $observers = [
 
     [
         'eventname' => '\core\event\course_created',
+        'callback' => '\local_autogroup\event_handler::create_adhoc_task',
+        'includefile' => 'local/autogroup/classes/event_handler.php',
+        'internal' => true,
+        'priority' => 0,
+    ],
+
+    [
+        'eventname' => '\core\event\course_deleted',
         'callback' => '\local_autogroup\event_handler::create_adhoc_task',
         'includefile' => 'local/autogroup/classes/event_handler.php',
         'internal' => true,

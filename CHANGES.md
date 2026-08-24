@@ -1,3 +1,10 @@
+## v4.5.2
+  * Ignore queued events whose course, group, or user has since been deleted.
+  * Clean plugin configuration when courses are deleted.
+  * Clean preserved manual assignments when users are deleted.
+  * Fix autogroup-set deletion to clean manual records by group ID.
+  * Add regression coverage for stale queued events and deletion cleanup.
+
 ## v2.8.2
   * Solves issue #44 - postgresql compatibility issue during upgrade process, previous fix was still buggy.
 
