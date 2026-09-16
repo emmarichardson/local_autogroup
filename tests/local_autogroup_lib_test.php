@@ -253,6 +253,52 @@ class local_autogroup_lib_test extends advanced_testcase {
     }
 
     /**
+     * A course role change must not resynchronise the user's other courses.
+     */
+    public function test_role_change_only_verifies_event_course() {
+        global $DB;
+
+        $this->setAdminUser();
+
+        $fieldid = $this->create_profile_field();
+
+        set_config('enabled', true, 'local_autogroup');
+        set_config('addtonewcourses', true, 'local_autogroup');
+        set_config('filter', $fieldid, 'local_autogroup');
+        set_config('adhoceventhandler', false, 'local_autogroup');
+        set_config('listenforrolechanges', true, 'local_autogroup');
+
+        $course1 = $this->getDataGenerator()->create_course();
+        $course2 = $this->getDataGenerator()->create_course();
+        $user = $this->getDataGenerator()->create_user();
+
+        $this->getDataGenerator()->enrol_user($user->id, $course1->id, 'student');
+        $this->getDataGenerator()->enrol_user($user->id, $course2->id, 'student');
+        profile_save_custom_fields($user->id, ['test' => 'Test 1']);
+        user_update_user($user, false, true);
+
+        $course1groups = groups_get_all_groups($course1->id, $user->id);
+        $course2groups = groups_get_all_groups($course2->id, $user->id);
+        $this->assertCount(1, $course1groups);
+        $this->assertCount(1, $course2groups);
+
+        $course2group = reset($course2groups);
+        $DB->delete_records('groups_members', [
+            'groupid' => $course2group->id,
+            'userid' => $user->id,
+        ]);
+
+        $event = (object) [
+            'courseid' => $course1->id,
+            'relateduserid' => $user->id,
+        ];
+
+        $this->assertNotFalse(\local_autogroup\event_handler::role_change($event));
+        $this->assertCount(1, groups_get_all_groups($course1->id, $user->id));
+        $this->assertCount(0, groups_get_all_groups($course2->id, $user->id));
+    }
+
+    /**
      * Create a profile field.
      *
      * @return int

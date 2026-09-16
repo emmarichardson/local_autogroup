@@ -268,13 +268,14 @@ class event_handler {
 
         global $DB;
 
+        $courseid = (int)$event->courseid;
         $userid = (int)$event->relateduserid;
 
         if (!$DB->record_exists('user', ['id' => $userid, 'deleted' => 0])) {
             return false;
         }
 
-        $usecase = new usecase\verify_user_group_membership($userid, $DB);
+        $usecase = new usecase\verify_user_group_membership($userid, $DB, $courseid);
         return $usecase->invoke();
     }
 

@@ -1,3 +1,6 @@
+## v4.5.3
+  * Scope role-change membership verification to the event's course.
+
 ## v4.5.2
   * Ignore queued events whose course, group, or user has since been deleted.
   * Clean plugin configuration when courses are deleted.
